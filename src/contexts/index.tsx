@@ -1,7 +1,6 @@
-import { createContext, ReactNode, useContext, useEffect, useState, useRef } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
   
 interface GlobalContextValue {
-  animationFrame: number,
   keyPressed: string | undefined;
 }
   
@@ -10,7 +9,6 @@ interface GlobalProviderProps {
 }
   
 const initialValues: GlobalContextValue = {
-  animationFrame: 0,
   keyPressed: undefined,
 };
   
@@ -45,17 +43,10 @@ const mapKeys = (key: string) => {
 
 export default function GlobalProvider(props: GlobalProviderProps) {
   const [keyPressed, setKeyPressed] = useState<string | undefined>(undefined);
-  const [animationFrame, setAnimationFrame] = useState<number>(0);
-
-  const loop = (ts: number) => {
-      setAnimationFrame(ts);
-      requestAnimationFrame(loop);
-  }
 
   useEffect(() => {
     window.addEventListener('keydown', (e) => setKeyPressed(mapKeys(e.key)));
     window.addEventListener('keyup', () => setKeyPressed(undefined));
-    requestAnimationFrame(loop);
 
     return () => {
       window.removeEventListener('keydown', (e) => setKeyPressed(mapKeys(e.key)));
@@ -66,7 +57,6 @@ export default function GlobalProvider(props: GlobalProviderProps) {
   const { children } = props;
 
   const value: GlobalContextValue = {
-    animationFrame,
     keyPressed,
   };
 
