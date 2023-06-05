@@ -1,23 +1,22 @@
-
 export default class Sound {
-    source: string;
-    audio: HTMLAudioElement;
+  source: string;
+  audio: HTMLAudioElement;
 
-    constructor(source: string){
-        this.source = source;
-        this.audio = new Audio(source);
-    }
+  constructor(source: string) {
+    this.source = source;
+    this.audio = new Audio(source);
+  }
 
-    play(){
-        this.audio.play();
-    }
+  play() {
+    this.audio.play();
+  }
 
-    pause(){
-        this.audio.pause();
-    }
+  pause() {
+    this.audio.pause();
+  }
 
-    setSource(newSource: string){
-        this.source = newSource;
-        this.audio = new Audio(newSource); 
-    }
+  setSource(newSource: string) {
+    this.source = newSource;
+    this.audio = new Audio(newSource);
+  }
 }

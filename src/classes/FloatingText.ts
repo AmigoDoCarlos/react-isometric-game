@@ -2,89 +2,104 @@ import { position } from "../types";
 import { Sprite } from "./Sprite";
 
 export default class FloatingText {
-    text: string;
-    color: string;
-    background: string;
-    padding: position;
-    style: string;
-    icon: Sprite | null;
+  text: string;
+  color: string;
+  background: string;
+  padding: position;
+  style: string;
+  icon: Sprite | null;
 
-    constructor(text: string, iconSprite: string | null, color?: string, background?: string, padding?: position, style?: string) {
-        this.text = text;
-        this.color = (color)? color : '#cccccc';
-        this.background = (background)? background : '#222222CC';
-        this.padding = (padding)? padding : {x: 5, y: 5};
-        this.style = (style)? style : "16px Segoe UI";
-        this.icon = (iconSprite)? new Sprite(iconSprite, 20, 1, 1, 0): null;
-    }
+  constructor(
+    text: string,
+    iconSprite: string | null,
+    color?: string,
+    background?: string,
+    padding?: position,
+    style?: string
+  ) {
+    this.text = text;
+    this.color = color ? color : "#cccccc";
+    this.background = background ? background : "#222222CC";
+    this.padding = padding ? padding : { x: 5, y: 5 };
+    this.style = style ? style : "16px Segoe UI";
+    this.icon = iconSprite ? new Sprite(iconSprite, 20, 1, 1, 0) : null;
+  }
 
-    getText(){
-        return this.text;
-    }
+  getText() {
+    return this.text;
+  }
 
-    setText(newText: string){
-        this.text = newText;
-    }
+  setText(newText: string) {
+    this.text = newText;
+  }
 
-    setColor(newColor: string){
-        this.color = newColor;
-    }
+  setColor(newColor: string) {
+    this.color = newColor;
+  }
 
-    setBackground(newColor: string){
-        this.background = newColor;
-    }
+  setBackground(newColor: string) {
+    this.background = newColor;
+  }
 
-    setPadding(newPadding: position){
-        this.padding = newPadding;
-    }
+  setPadding(newPadding: position) {
+    this.padding = newPadding;
+  }
 
-    setStyle(newStyle: string){
-        this.style = newStyle;
-    }
+  setStyle(newStyle: string) {
+    this.style = newStyle;
+  }
 
-    drawBackground(canvas: CanvasRenderingContext2D, x: number, y: number, textWidth: number, textHeight: number, iconOffset: number, borderRadius: number) {
-        const w = textWidth + 3 * this.padding.x + iconOffset;
-        const h = textHeight + 2 * this.padding.y;
-        
-        canvas.fillStyle = this.background;
-        canvas.beginPath();
-        canvas.moveTo(x + borderRadius, y);
-        canvas.lineTo(x + w - borderRadius, y);
-        canvas.quadraticCurveTo(x + w, y, x + w, y + borderRadius);
-        canvas.lineTo(x + w, y + h - borderRadius);
-        canvas.quadraticCurveTo(x + w, y + h, x + w - borderRadius, y + h);
-        canvas.lineTo(x + borderRadius, y + h);
-        canvas.quadraticCurveTo(x, y + h, x, y + h - borderRadius);
-        canvas.lineTo(x, y + borderRadius);
-        canvas.quadraticCurveTo(x, y, x + borderRadius, y);
-        canvas.closePath();
-        canvas.fill();
-    }
+  drawBackground(
+    canvas: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    textWidth: number,
+    textHeight: number,
+    iconOffset: number,
+    borderRadius: number
+  ) {
+    const w = textWidth + 3 * this.padding.x + iconOffset;
+    const h = textHeight + 2 * this.padding.y;
 
-    drawText(canvas: CanvasRenderingContext2D, position: position){
-        canvas.textAlign = "center";
-        canvas.font = this.style;
-        canvas.fillStyle = this.color;
-        canvas.fillText(
-            this.text,
-            position.x,
-            position.y,
-        );   
-    }
+    canvas.fillStyle = this.background;
+    canvas.beginPath();
+    canvas.moveTo(x + borderRadius, y);
+    canvas.lineTo(x + w - borderRadius, y);
+    canvas.quadraticCurveTo(x + w, y, x + w, y + borderRadius);
+    canvas.lineTo(x + w, y + h - borderRadius);
+    canvas.quadraticCurveTo(x + w, y + h, x + w - borderRadius, y + h);
+    canvas.lineTo(x + borderRadius, y + h);
+    canvas.quadraticCurveTo(x, y + h, x, y + h - borderRadius);
+    canvas.lineTo(x, y + borderRadius);
+    canvas.quadraticCurveTo(x, y, x + borderRadius, y);
+    canvas.closePath();
+    canvas.fill();
+  }
 
-    render(canvas: CanvasRenderingContext2D, position: position){
-        const textProps = canvas.measureText(this.text);
-        const textWidth = textProps.width;
-        const textHeight = textProps.fontBoundingBoxAscent;
-        this.icon?.setSize(textHeight);
+  drawText(canvas: CanvasRenderingContext2D, position: position) {
+    canvas.textAlign = "center";
+    canvas.font = this.style;
+    canvas.fillStyle = this.color;
+    canvas.fillText(this.text, position.x, position.y);
+  }
 
-        const iconOffset = (this.icon)? this.icon.getSize() : 0;
+  render(canvas: CanvasRenderingContext2D, position: position) {
+    const textProps = canvas.measureText(this.text);
+    const textWidth = textProps.width;
+    const textHeight = textProps.fontBoundingBoxAscent;
+    this.icon?.setSize(textHeight);
 
-        const x = position.x - 2 * this.padding.x - (textWidth/2) - iconOffset;
-        const y = position.y - this.padding.y - (textHeight/1.25);
-        
-        this.drawBackground(canvas, x, y, textWidth, textHeight, iconOffset, 10);
-        this.icon && this.icon.render(canvas, {x: x + this.padding.x, y: y + this.padding.y});
-        this.drawText(canvas, position);
-    }
+    const iconOffset = this.icon ? this.icon.getSize() : 0;
+
+    const x = position.x - 2 * this.padding.x - textWidth / 2 - iconOffset;
+    const y = position.y - this.padding.y - textHeight / 1.25;
+
+    this.drawBackground(canvas, x, y, textWidth, textHeight, iconOffset, 10);
+    this.icon &&
+      this.icon.render(canvas, {
+        x: x + this.padding.x,
+        y: y + this.padding.y,
+      });
+    this.drawText(canvas, position);
+  }
 }
