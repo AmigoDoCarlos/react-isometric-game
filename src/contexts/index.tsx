@@ -37,7 +37,7 @@ const mapKeys = (key: string) => {
     case 'ArrowRight':
       return 'right';
     default:
-      return undefined;
+      return key;
   }
 }
 

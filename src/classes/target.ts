@@ -1,69 +1,54 @@
-import { player } from "./player";
+import { Player } from "./Player";
+import { Sprite } from "./Sprite";
 
 type position = {
     x: number,
     y: number
 }
 
-export class target {
-    sprite: HTMLImageElement;
-    quad: number[];
+export class Target {
     size: number;
-    moveCount: number;
-    maxMoveCount: number;
     position: position;
+    sprite: Sprite;
 
-    constructor (sprite: string, size: number, initialPos: position) {
-        this.sprite = new Image();
-        this.sprite.src = sprite;
-        this.quad = [0 , 0];
+    constructor (spriteSrc: string, size: number, initialPos: position, animationPeriod: number) {
+        this.sprite = new Sprite(spriteSrc, size, 1, 2, animationPeriod);
         this.size = size;
-        this.moveCount = 0;
-        this.maxMoveCount = 200;
         this.position = initialPos;
+    }
+
+    getSize(){
+        return this.size;
     }
 
     setSize(newSize: number){
         this.size = newSize;
+        this.sprite.setSize(newSize);
     }
 
-    setSprite(newSprite: string){
-        this.sprite.src = newSprite;
+    setPosition(pos: position){
+        this.position = pos;
     }
 
-    setPosition(newPos: position){
-        this.position = newPos;
-    }
+    getPositionAndSize(hitbox?: number){
+        const h = this.sprite.source.height;
+        const w = this.sprite.source.width;
+        const ratio = (h / this.sprite.rows) / (w / this.sprite.columns);
+        
+        const margin = (hitbox && (hitbox > 0) && (hitbox <= 1))
+        ? ((1 - hitbox) / 2) * this.size
+        : 0;
 
-    setQuad(newQuad: number[]){
-        this.quad = newQuad;
-    }
-
-    getPositionAndSize(){
-        const sizeRatio = (this.sprite.width / 2) / this.sprite.height;
-
-        return ({
+        return {
             x: this.position.x,
             y: this.position.y,
-            width: this.size * sizeRatio,
-            height: this.size,
-        })
-    }
-
-    private move(dt: number, n: number){
-        if(this.moveCount < this.maxMoveCount){
-            this.moveCount += dt;
-            return n;
+            width: this.size - margin,
+            height: (this.size * ratio) - margin,
         }
-        this.moveCount = 0;
-        if(n > 0){
-            return 0;
-        }
-        return 1;
     }
 
     private hasCollided(invaderX: number, invaderY: number, invaderW: number, invaderH: number){
-        const {x, y, width, height} = this.getPositionAndSize();
+        const {x, y, width, height} = this.getPositionAndSize(0.5);
 
         if((invaderX < (x + width)) && (invaderX + invaderW > (x))
             && (invaderY < (y + height)) && (invaderY + invaderH > (y))
@@ -73,12 +58,9 @@ export class target {
         return false;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-
-
-    update(dt: number, players: player[], canvasW: number, canvasH: number, scorePoints: () => void){
+    private checkForCollisions(players: Player[], canvasW: number, canvasH: number, scorePoints: () => void){
         players.forEach(player => {
-            const {x, y, width, height} = player.getPositionAndSize();
+            const {x, y, width, height} = player.getPositionAndSize(0.5);
             if(this.hasCollided(x, y, width, height)){
                 scorePoints();
                 this.setPosition({
@@ -87,20 +69,17 @@ export class target {
                 });
             }
         });
-        this.quad = [this.move(dt, this.quad[0]), 0];
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+
+    update(dt: number, players: Player[], canvasW: number, canvasH: number, scorePoints: () => void){
+        this.checkForCollisions(players, canvasW, canvasH, scorePoints);
+        this.sprite.update(dt);
     }
 
     render(canvas: CanvasRenderingContext2D){
-        const w = this.sprite.width;
-        const h = this.sprite.height;
-        const ratio = 2 * h / w;
-
-        canvas.drawImage(
-            this.sprite,                                        // src da imagem a ser desenhada
-            this.quad[0] * (w/2), 0,                            // coordenadas X e Y, relativos à própria imagem, do início do quadrante
-            (w / 2), (h),                                       // tamanho do quadrante (width, height)
-            this.position.x, this.position.y,                   // coordenadas X e Y do início do desenho (canto superior esquerdo)
-            this.size, ratio * this.size,                           // tamanho final da imagem (width, height)
-        );
+        this.sprite.render(canvas, this.position);
     }
 }

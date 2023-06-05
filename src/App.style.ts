@@ -22,9 +22,9 @@ export const EscapeRoom = styled.canvas`
 `;
 
 export const ScoreBoard = styled.div`
-    padding: 10px;
+    padding: 5px;
     background-color: #800080;
-    border-radius: 20px;
+    border-radius: 35px;
     position: relative;
 `;
 

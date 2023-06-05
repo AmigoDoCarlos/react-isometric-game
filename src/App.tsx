@@ -1,21 +1,43 @@
-import { useEffect, useRef, useState } from "react";
-import { Body, EscapeRoom, Score, ScoreBoard } from "./App.style";
+import { useEffect, useRef } from "react";
+import { Body, EscapeRoom, ScoreBoard } from "./App.style";
+import { InteractiveObject } from "./classes/InteractiveObject";
 import { useGlobalContext } from "./contexts";
-import { player } from "./classes/player";
-import { target } from "./classes/target";
+import { Player } from './classes/Player';
+import { Sprite } from "./classes/Sprite";
 import Button from "./components/Button";
-import playerSprite from './assets/sprite.png';   //importação normal do arquivo de imagem
-import targetSprite from './assets/target.png';
-import floorSprite from './assets/floor.png';
 import useLoop from "./hooks/useLoop";
+import playerSprite from './assets/player.png';   //importação normal do arquivo de imagem
+import drawerSprite from './assets/drawer.png';
+import deskSprite from './assets/desk.png';
+import floorSprite from './assets/floor.png';
+import eKey from './assets/icons/e-key.png';
+import fKey from './assets/icons/f-key.png';
+import doorSound from './assets/sounds/door.mp3';
+import grabSound from './assets/sounds/grab.mp3';
+import paperSound from './assets/sounds/paper.mp3';
+import wooshSound from './assets/sounds/woosh1.mp3';
 
-const CANVAS_WIDTH = 900;
-const CANVAS_HEIGHT = 600;
-const TARGET_SIZE = 50;
-const SPEED = 0.5;
+const CANVAS_WIDTH = 1000;
+const CANVAS_HEIGHT = 700;
+const PLAYER_SIZE = 100;
+const DRAWER_SIZE = 200;
+const DESK_SIZE = 220;
+const PLAYER_SPEED = 0.4;
+const ANIMATION_PERIOD = 100;
 
-const floor = new Image();
-floor.src = floorSprite;
+const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
+  players.current = [...players.current, new Player(
+    'Alex Topiroze',
+    playerSprite,
+    {
+      x: (CANVAS_WIDTH - PLAYER_SIZE)/2,
+      y: 30
+    },
+    PLAYER_SPEED,
+    PLAYER_SIZE,
+    ANIMATION_PERIOD,
+  )];
+}
 
 export default function App() {
 
@@ -24,11 +46,47 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);   //ref do canvas
   const ctx = useRef<CanvasRenderingContext2D | null>(null);  //ref do contexto do canvas
   const key = useRef<string | undefined>(keyPressed);
+  const players = useRef<Player[]>([]);
+  const objects = useRef<InteractiveObject[]>([]);
+  const floor = useRef<Sprite>();
   
-  const [score, setScore] = useState(0);
-  const players = useRef<player[]>([]);
-  const targets = useRef<target[]>([]);
-  
+  useEffect(() => {
+    objects.current = [
+      new InteractiveObject(
+        drawerSprite,
+        DRAWER_SIZE,
+        {
+          x: 80, 
+          y: (CANVAS_HEIGHT - DRAWER_SIZE)/3.4,
+        },
+        (ANIMATION_PERIOD / 2),
+        3,
+        [
+          {key: 'e', icon: eKey, sound: doorSound, texts: ['abrir o armário', 'fechar o armário']},
+          {key: 'f', icon: fKey, sound: grabSound, texts: ['pegar o conteúdo']}
+        ],
+        
+      ),
+      new InteractiveObject(
+        deskSprite,
+        DESK_SIZE,
+        {
+          x: CANVAS_WIDTH - (DRAWER_SIZE + 80), 
+          y: (CANVAS_HEIGHT - DRAWER_SIZE)/3.4,
+        },
+        (ANIMATION_PERIOD / 2),
+        3,
+        [
+          {key: 'e', icon: eKey, sound: wooshSound, texts: ['abrir o notebook', 'fechar o notebook']},
+          {key: 'f', icon: fKey, sound: paperSound, texts: ['pegar o papel']}
+        ],
+        
+      )
+    ];
+
+    floor.current = new Sprite(floorSprite, (CANVAS_WIDTH - 20), 1, 1, 0);
+  }, []);
+
   useEffect(() => {
     if(canvasRef.current){                                // se o canvas já está definido,
       ctx.current = canvasRef.current.getContext('2d');   // então associa o context a ele
@@ -38,44 +96,22 @@ export default function App() {
   useEffect(() => {
     key.current = keyPressed;
   }, [keyPressed])
-
-  const spawnPlayer = () => {
-    players.current = [...players.current, new player(
-      'kevin',
-      playerSprite,
-      {
-        x: 0,
-        y: 0
-      },
-      SPEED,
-    )];
-
-    targets.current = [...targets.current, new target(
-      targetSprite,
-      TARGET_SIZE,
-      {
-        x: (CANVAS_WIDTH - TARGET_SIZE)/2, 
-        y: (CANVAS_HEIGHT - TARGET_SIZE)/2,
-      }
-    )];
-  }
   
   useLoop((dt) => {
-    if(ctx.current){
+    if(floor.current && ctx.current){
       const context = ctx.current;
       context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);                            //limpeza do canvas
-      context.drawImage(floor, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      floor.current.render(context, {x: 10, y: 100});
+
+      objects.current.forEach(o => {                                                   //update e render do vetor de alvos
+        o.update(key.current, players.current, () => {});
+        o.render(context);
+      });
 
       players.current.forEach(p => {                                                   //update e render do vetor de players
         p.update(dt, key.current);
         p.render(context);
       });
-
-      targets.current.forEach(t => {                                                   //update e render do vetor de alvos
-        t.update(dt, players.current, CANVAS_WIDTH, CANVAS_HEIGHT, () => setScore(prev => prev + 1));
-        t.render(context);
-      });
-
     }
   });
 
@@ -83,78 +119,15 @@ export default function App() {
   return (
     <Body>
       <ScoreBoard>
-        <Score>
-          Pontos: {score}
-        </Score>
-
         <EscapeRoom                         // EscapeRoom é um canvas styled component
           width={`${CANVAS_WIDTH}px`}
           height={`${CANVAS_HEIGHT}px`}
           ref={canvasRef}
         />
-
       </ScoreBoard>
-      <Button onClick={spawnPlayer}>
+      <Button onClick={()=> spawnPlayer(players)}>
         Começar
       </Button>
     </Body>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // useEffect(() => {
-  //   console.log(keyPressed);
-  //   if(ctx.current && (animationFrame !== lastAnimationFrame.current)){
-  //     const context = ctx.current;
-  //     const pl = [...players.current];
-  //     const tg = [...targets.current];
-  //     const dt = (animationFrame - lastAnimationFrame.current);           //diferença de tempo, em milisegundos, entre o frame atual e o último
-      
-  //     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);               //limpeza do canvas
-  //     drawFloor(context);
-
-  //     pl.forEach(p => {                                                   //update e render do vetor de players
-  //       p.update(dt, keyPressed);
-  //       p.render(context);
-  //     });
-
-  //     tg.forEach(t => {                                                   //update e render do vetor de alvos
-  //       t.update(dt, pl, CANVAS_WIDTH, CANVAS_HEIGHT, () => setScore(previous => previous + 1));
-  //       t.render(context);
-  //     });
-
-  //     players.current = pl;
-  //     targets.current = tg;
-  //     lastAnimationFrame.current = animationFrame;
-  //   }
-  // }, [ctx.current, players.current, keyPressed, animationFrame, lastAnimationFrame]);
