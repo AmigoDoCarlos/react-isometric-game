@@ -95,10 +95,11 @@ export class InteractiveObject {
 
     private toggleState(key: string | undefined){
         const index = this.actions.findIndex(action => action.key === key);
-        if(index < 0) return;
-
-        switch(key){
-            case 'e': 
+    
+        switch(index){
+            case -1:
+                return;
+            case 0: 
                 this.actions[index].sound.play();
                 if(this.currentState === 0){
                     this.actions[index].sound.play();
@@ -106,7 +107,7 @@ export class InteractiveObject {
                 }
                 this.currentState = 0;
             break;
-            case 'f':
+            default:
                 if((this.currentState > 0) && (this.currentState < (this.states - 1))){
                     this.actionTarget += 1;
                     this.actions[index].sound.play();
