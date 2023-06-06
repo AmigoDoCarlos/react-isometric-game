@@ -8,11 +8,17 @@ export type size = {
   h: number;
 };
 
-export type quad = [number, number];
+export type quad = [
+  number,
+  number
+];
 
-export type iconKeyAndTexts = {
-  icon: string;
-  key: string;
+export type keyAndIcon = {
+  key: string,
+  icon: string,
+}
+
+export type textAndSound = {
   sound: string;
   texts: string[];
 };

@@ -1,8 +1,8 @@
 import { position } from "../types";
 import FloatingText from "./FloatingText";
 import { Sprite } from "./Sprite";
-
-const ISOMETRIC_RATIO = Math.cos(Math.PI / 4) * Math.cos(Math.PI / 6); //o ângulo de visualização do mapa é de 30° de inclinação, por isso precisamos desta constante
+import { ISOMETRIC_RATIO } from "../constants";
+import { InteractiveObject } from "./InteractiveObject";
 
 export class Player {
   name: FloatingText;
@@ -99,23 +99,54 @@ export class Player {
     const w = this.sprite.source.width;
     const ratio = h / this.sprite.rows / (w / this.sprite.columns);
 
-    const margin =
-      hitbox && hitbox > 0 && hitbox <= 1 ? ((1 - hitbox) / 2) * this.size : 0;
+    const margin = hitbox && (hitbox > 0 && hitbox <= 1)
+    ? ((1 - hitbox) * this.size) / 2
+    : 0;
 
     return {
-      x: this.position.x,
-      y: this.position.y,
-      width: this.size - margin,
-      height: this.size * ratio - margin,
+      x: this.position.x + margin,
+      y: this.position.y + margin,
+      width: (this.size - 2 * margin),
+      height: (this.size * ratio - 2 * margin),
     };
+  }
+
+  private hasCollided(
+    invaderX: number,
+    invaderY: number,
+    invaderW: number,
+    invaderH: number
+  ) {
+    const { x, y, width, height } = this.getPositionAndSize(0.25);
+    if (
+      invaderX < x + width &&
+      invaderX + invaderW > x &&
+      invaderY < y + height &&
+      invaderY + invaderH > y
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  private checkForCollisions(objects: InteractiveObject[]) {
+    objects.forEach((object) => {
+      let highlight = false;
+      const { x, y, width, height } = object.getPositionAndSize(0.5);
+      if (this.hasCollided(x, y, width, height)) {
+        highlight = true;
+      } 
+      object.setHighlight(highlight);
+    });
   }
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  update(dt: number, walkDirection: string | undefined) {
+  update(dt: number, objects: InteractiveObject[], walkDirection: string | undefined) {
+    this.checkForCollisions(objects);
     if (walkDirection) {
-      this.updatePosition();
       this.updateDirection(dt, walkDirection);
+      this.updatePosition();
     } else {
       this.reset();
     }

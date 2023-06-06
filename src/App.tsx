@@ -10,20 +10,11 @@ import playerSprite from "./assets/player.png"; //importação normal do arquivo
 import drawerSprite from "./assets/drawer.png";
 import deskSprite from "./assets/desk.png";
 import floorSprite from "./assets/floor.png";
-import eKey from "./assets/icons/e-key.png";
-import fKey from "./assets/icons/f-key.png";
 import doorSound from "./assets/sounds/door.mp3";
 import grabSound from "./assets/sounds/grab.mp3";
 import paperSound from "./assets/sounds/paper.mp3";
 import wooshSound from "./assets/sounds/woosh1.mp3";
-
-const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 700;
-const PLAYER_SIZE = 100;
-const DRAWER_SIZE = 200;
-const DESK_SIZE = 220;
-const PLAYER_SPEED = 0.4;
-const ANIMATION_PERIOD = 100;
+import { CANVAS_WIDTH, CANVAS_HEIGHT, DRAWER_SIZE, DESK_SIZE, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD, FLOOR_TOP_Y, FLOOR_PADDING } from "./constants";
 
 const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
   players.current = [
@@ -57,22 +48,17 @@ export default function App() {
       new InteractiveObject(
         drawerSprite,
         DRAWER_SIZE,
+        3,
         {
           x: 80,
           y: (CANVAS_HEIGHT - DRAWER_SIZE) / 3.4,
         },
-        ANIMATION_PERIOD / 2,
-        3,
         [
           {
-            key: "e",
-            icon: eKey,
             sound: doorSound,
             texts: ["abrir o armário", "fechar o armário"],
           },
           {
-            key: "f",
-            icon: fKey,
             sound: grabSound,
             texts: ["pegar o conteúdo"],
           },
@@ -81,25 +67,25 @@ export default function App() {
       new InteractiveObject(
         deskSprite,
         DESK_SIZE,
+        3,
         {
           x: CANVAS_WIDTH - (DRAWER_SIZE + 80),
           y: (CANVAS_HEIGHT - DRAWER_SIZE) / 3.4,
         },
-        ANIMATION_PERIOD / 2,
-        3,
         [
           {
-            key: "e",
-            icon: eKey,
             sound: wooshSound,
             texts: ["abrir o notebook", "fechar o notebook"],
           },
-          { key: "f", icon: fKey, sound: paperSound, texts: ["pegar o papel"] },
+          {
+            sound: paperSound,
+            texts: ["pegar o papel"],
+          },
         ]
       ),
     ];
 
-    floor.current = new Sprite(floorSprite, CANVAS_WIDTH - 20, 1, 1, 0);
+    floor.current = new Sprite(floorSprite, CANVAS_WIDTH - (FLOOR_PADDING / 2), 1, 1, 0);
   }, []);
 
   useEffect(() => {
@@ -117,17 +103,17 @@ export default function App() {
     if (floor.current && ctx.current) {
       const context = ctx.current;
       context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); //limpeza do canvas
-      floor.current.render(context, { x: 10, y: 100 });
+      floor.current.render(context, { x: FLOOR_PADDING, y: FLOOR_TOP_Y});
 
       objects.current.forEach((o) => {
         //update e render do vetor de alvos
-        o.update(key.current, players.current);
+        o.update(key.current);
         o.render(context);
       });
 
       players.current.forEach((p) => {
         //update e render do vetor de players
-        p.update(dt, key.current);
+        p.update(dt, objects.current, key.current);
         p.render(context);
       });
     }

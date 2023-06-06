@@ -1,8 +1,8 @@
 import { position } from "../types";
 import { Sprite } from "./Sprite";
 
-export default class FloatingText {
-  text: string;
+export default class FloatingText {     //classe para representar os textos flutuantes (nomes de personagens, ações em objetos, etc)
+  text: string;                         //as variáveis aqui são bem diretas (acho eu) em relação ao que armazenam.
   color: string;
   background: string;
   padding: position;
@@ -49,7 +49,7 @@ export default class FloatingText {
     this.style = newStyle;
   }
 
-  drawBackground(
+  private drawBackground(
     canvas: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -76,14 +76,23 @@ export default class FloatingText {
     canvas.fill();
   }
 
-  drawText(canvas: CanvasRenderingContext2D, position: position) {
+  private drawIcon(canvas: CanvasRenderingContext2D, x: number, y: number){
+    this.icon &&
+      this.icon.render(canvas, {
+        x: x + this.padding.x,
+        y: y + this.padding.y,
+      }
+    );
+  }
+
+  private drawText(canvas: CanvasRenderingContext2D, position: position) {
     canvas.textAlign = "center";
     canvas.font = this.style;
     canvas.fillStyle = this.color;
     canvas.fillText(this.text, position.x, position.y);
   }
 
-  render(canvas: CanvasRenderingContext2D, position: position) {
+  render(canvas: CanvasRenderingContext2D, position: position) {    //desenha o fundo, o ícone (caso esteja definido) e o texto em si 
     const textProps = canvas.measureText(this.text);
     const textWidth = textProps.width;
     const textHeight = textProps.fontBoundingBoxAscent;
@@ -95,11 +104,7 @@ export default class FloatingText {
     const y = position.y - this.padding.y - textHeight / 1.25;
 
     this.drawBackground(canvas, x, y, textWidth, textHeight, iconOffset, 10);
-    this.icon &&
-      this.icon.render(canvas, {
-        x: x + this.padding.x,
-        y: y + this.padding.y,
-      });
+    this.drawIcon(canvas, x, y);
     this.drawText(canvas, position);
   }
 }

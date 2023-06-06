@@ -1,57 +1,56 @@
-import { iconKeyAndTexts } from "../types";
-import FloatingText from "./FloatingText";
-import { Player } from "./Player";
-import Sound from "./Sound";
+import { textAndSound } from "../types";
 import { Sprite } from "./Sprite";
+import { ACTION_KEYS } from "../constants";
+import FloatingText from "./FloatingText";
+import Sound from "./Sound";
 
 type position = {
   x: number;
   y: number;
 };
 
-export class InteractiveObject {
-  size: number;
-  position: position;
-  sprite: Sprite;
+export class InteractiveObject {          //clase para representar os objetos que o usuário pode interagir
+  size: number;                           //tamanho (largura, pra ser mais exato. O comprimento é calculado automaticamente a partir dela)
+  position: position;                     //coordenadas [x,y] da quina superior esquerda do sprite
+  sprite: Sprite;                         
   isHighlighted: boolean;
-  states: number;
-  currentState: number;
-  lastKeyPressed: string | undefined;
-  actionTarget: number;
-  actions: {
-    key: string;
-    sound: Sound;
-    object: FloatingText;
-    options: string[];
+  states: number;                         //quantos estados o objeto pode ter (= quantos quads horizontais o sprite do objeto tem)
+  currentState: number;                   
+  lastKeyPressed: string | undefined;     
+  actionTarget: number;                   
+  actions: {                              //conjunto de ações que o objeto pode responder 
+    sound: Sound;                         //qual som é feito quando a ação dispara
+    object: FloatingText;                 //objeto de texto a ser exibido
+    options: string[];                    //opções de texto a serem exibidas no objeto
   }[];
 
   constructor(
     spriteSrc: string,
     size: number,
-    initialPos: position,
-    animationPeriod: number,
     states: number,
-    actions: iconKeyAndTexts[]
+    position: position,
+    actions: textAndSound[],
   ) {
-    this.sprite = new Sprite(spriteSrc, size, 2, states, animationPeriod);
+    this.sprite = new Sprite(spriteSrc, size, 2, states, 0);
     this.size = size;
-    this.position = initialPos;
+    this.position = position;
     this.isHighlighted = false;
     this.states = states;
     this.currentState = 0;
     this.lastKeyPressed = undefined;
     this.actions = [];
     this.actionTarget = 1;
-    actions.forEach((action) => {
-      this.actions = [
-        ...this.actions,
-        {
-          key: action.key,
-          options: action.texts,
-          sound: new Sound(action.sound),
-          object: new FloatingText(action.texts[0], action.icon),
-        },
-      ];
+    actions.forEach((action, index) => {
+      if(index < ACTION_KEYS.length){
+        this.actions = [
+          ...this.actions,
+          {
+            options: action.texts,
+            sound: new Sound(action.sound),
+            object: new FloatingText(action.texts[0], ACTION_KEYS[index].icon),
+          },
+        ];
+      }
     });
   }
 
@@ -68,54 +67,29 @@ export class InteractiveObject {
     this.position = pos;
   }
 
+  setHighlight(high: boolean){
+    this.isHighlighted = high;
+  }
+
   getPositionAndSize(hitbox?: number) {
     const h = this.sprite.source.height;
     const w = this.sprite.source.width;
     const ratio = h / this.sprite.rows / (w / this.sprite.columns);
 
-    const margin =
-      hitbox && hitbox > 0 && hitbox <= 1 ? ((1 - hitbox) / 2) * this.size : 0;
+    const margin = hitbox && (hitbox > 0 && hitbox <= 1)
+    ? ((1 - hitbox) * this.size) / 2
+    : 0;
 
     return {
-      x: this.position.x,
-      y: this.position.y,
-      width: this.size - margin,
-      height: this.size * ratio - margin,
+      x: this.position.x + margin,
+      y: this.position.y + margin,
+      width: (this.size - 2 * margin),
+      height: (this.size * ratio - 2 * margin),
     };
   }
 
-  private hasCollided(
-    invaderX: number,
-    invaderY: number,
-    invaderW: number,
-    invaderH: number
-  ) {
-    const { x, y, width, height } = this.getPositionAndSize(0.2);
-    if (
-      invaderX < x + width &&
-      invaderX + invaderW > x &&
-      invaderY < y + height &&
-      invaderY + invaderH > y
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  private checkForCollisions(players: Player[], callback?: () => void) {
-    players.forEach((player) => {
-      const { x, y, width, height } = player.getPositionAndSize();
-      if (this.hasCollided(x, y, width, height)) {
-        callback && callback();
-        this.isHighlighted = true;
-      } else {
-        this.isHighlighted = false;
-      }
-    });
-  }
-
-  private toggleState(key: string | undefined) {
-    const index = this.actions.findIndex((action) => action.key === key);
+  private toggleState(key: string | undefined) {                            //função relativamente problemática por ser difícil de escalar.
+    const index = ACTION_KEYS.findIndex((action) => action.key === key);   //atualmente só funciona bem com 3 estados.
 
     switch (index) {
       case -1:
@@ -134,7 +108,6 @@ export class InteractiveObject {
           this.actions[index].sound.play();
           this.currentState = this.actionTarget;
         }
-        break;
     }
   }
 
@@ -167,12 +140,7 @@ export class InteractiveObject {
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  update(
-    keyPressed: string | undefined,
-    players: Player[],
-    callback?: () => void
-  ) {
-    this.checkForCollisions(players, callback);
+  update(keyPressed: string | undefined) {
     if (!this.lastKeyPressed && this.isHighlighted) {
       this.toggleState(keyPressed);
     }

@@ -1,0 +1,26 @@
+import { keyAndIcon } from "../types";
+import eKey from "../assets/icons/e-key.png";
+import fKey from "../assets/icons/f-key.png";
+
+export const ACTION_KEYS: keyAndIcon[] = [      //todo objeto iterável deve obedecer essa sequência de teclas (não necessariamente todas)
+    {
+        key: 'e',               //ação primária
+        icon: eKey,
+    },{
+        key: 'f',               //ação secundária
+        icon: fKey,
+    },
+
+    //demais ações...
+];
+
+export const CANVAS_WIDTH = 1000;
+export const CANVAS_HEIGHT = 700;
+export const FLOOR_PADDING = 10;
+export const FLOOR_TOP_Y = 100;
+export const PLAYER_SIZE = 100;
+export const DRAWER_SIZE = 200;
+export const DESK_SIZE = 220;
+export const PLAYER_SPEED = 0.4;
+export const ANIMATION_PERIOD = 100;
+export const ISOMETRIC_RATIO = Math.cos(Math.PI / 4) * Math.cos(Math.PI / 6); //o ângulo de visualização do mapa é de 30° de inclinação, por isso esta constante
