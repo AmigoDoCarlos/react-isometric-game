@@ -1,8 +1,8 @@
 import { ISOMETRIC_ANGLE } from "../constants";
 import { position } from "../types";
-import Sprite from "./Sprite";
+import { Sprite } from "./Sprite";
 
-export default class Floor {
+export class Floor {
     sprite: Sprite;
     position: position;
     topCornerCoordinates: position;

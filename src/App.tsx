@@ -1,16 +1,17 @@
 import { useEffect, useRef } from "react";
 import { Body, EscapeRoom, ScoreBoard } from "./App.style";
 import { useGlobalContext } from "./contexts";
-import InteractiveObject from "./classes/InteractiveObject";
-import Player from "./classes/Player";
-import Floor from "./classes/Floor";
+import { InteractiveObject } from "./classes/InteractiveObject";
+import { Player } from "./classes/Player";
+import { Floor } from "./classes/Floor";
 import Button from "./components/Button";
 import useLoop from "./hooks/useLoop";
 import playerSprite from "./assets/player.png"; //importação normal do arquivo de imagem
 import RenderAll from "./functions/Renderer";
 import UpdateAll from "./functions/Updater";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD } from "./constants";
 import BuildScene from "./functions/SceneBuilder";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD } from "./constants";
+
 
 const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
   players.current = [

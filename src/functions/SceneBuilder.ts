@@ -1,5 +1,5 @@
-import InteractiveObject from "../classes/InteractiveObject";
-import Floor from "../classes/Floor";
+import { InteractiveObject } from "../classes/InteractiveObject";
+import { Floor } from "../classes/Floor";
 import drawerSprite from "../assets/drawer.png";
 import deskSprite from "../assets/desk.png";
 import floorSprite from "../assets/floor.png";

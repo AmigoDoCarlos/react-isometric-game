@@ -1,6 +1,6 @@
-import Floor from "../classes/Floor";
-import Player from "../classes/Player";
-import InteractiveObject from "../classes/InteractiveObject";
+import { Floor } from "../classes/Floor";
+import { Player } from "../classes/Player";
+import { InteractiveObject } from "../classes/InteractiveObject";
 import { OBJECTS_HITBOX, PLAYER_HITBOX, SHOW_DISTANCE_TO_BOTTOM_CORNER } from "../constants";
 import { position } from "../types";
 

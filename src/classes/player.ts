@@ -1,10 +1,10 @@
 import { position } from "../types";
-import InteractiveObject from "./InteractiveObject";
-import FloatingText from "./FloatingText";
-import Sprite from "./Sprite";
+import { InteractiveObject } from "./InteractiveObject";
+import { FloatingText } from "./FloatingText";
+import { Sprite } from "./Sprite";
 import { ISOMETRIC_RATIO, OBJECTS_HITBOX, PLAYER_HITBOX, SHOW_HITBOX } from "../constants";
 
-export default class Player {
+export class Player {
   name: FloatingText;
   sprite: Sprite;
   speed: number;

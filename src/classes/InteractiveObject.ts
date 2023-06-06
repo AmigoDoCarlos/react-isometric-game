@@ -1,6 +1,6 @@
 import { textAndSound } from "../types";
-import Sprite from "./Sprite";
-import FloatingText from "./FloatingText";
+import { Sprite } from "./Sprite";
+import { FloatingText } from "./FloatingText";
 import Sound from "./Sound";
 import { ACTION_KEYS, OBJECTS_HITBOX, SHOW_HITBOX } from "../constants";
 
@@ -9,7 +9,7 @@ type position = {
   y: number;
 };
 
-export default class InteractiveObject {  //clase para representar os objetos que o usuário pode interagir
+export class InteractiveObject {          //clase para representar os objetos que o usuário pode interagir
   size: number;                           //tamanho (largura, pra ser mais exato. O comprimento é calculado automaticamente a partir dela)
   position: position;                     //coordenadas [x,y] da quina superior esquerda do sprite
   sprite: Sprite;                         
