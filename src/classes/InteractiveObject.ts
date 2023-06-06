@@ -1,6 +1,6 @@
 import { textAndSound } from "../types";
 import { Sprite } from "./Sprite";
-import { ACTION_KEYS } from "../constants";
+import { ACTION_KEYS, OBJECTS_HITBOX, SHOW_HITBOX } from "../constants";
 import FloatingText from "./FloatingText";
 import Sound from "./Sound";
 
@@ -88,6 +88,12 @@ export class InteractiveObject {          //clase para representar os objetos qu
     };
   }
 
+  private hitbox(canvas: CanvasRenderingContext2D){
+    const { x, y, width, height } = this.getPositionAndSize(OBJECTS_HITBOX);
+    canvas.fillStyle = "lime";
+    canvas.fillRect(x, y, width, height);
+  }
+
   private toggleState(key: string | undefined) {                            //função relativamente problemática por ser difícil de escalar.
     const index = ACTION_KEYS.findIndex((action) => action.key === key);   //atualmente só funciona bem com 3 estados.
 
@@ -151,5 +157,7 @@ export class InteractiveObject {          //clase para representar os objetos qu
   render(canvas: CanvasRenderingContext2D) {
     this.sprite.render(canvas, this.position);
     this.renderTexts(canvas);
+
+    SHOW_HITBOX && this.hitbox(canvas);
   }
 }

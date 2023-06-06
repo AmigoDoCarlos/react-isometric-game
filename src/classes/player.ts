@@ -1,7 +1,7 @@
 import { position } from "../types";
 import FloatingText from "./FloatingText";
 import { Sprite } from "./Sprite";
-import { ISOMETRIC_RATIO } from "../constants";
+import { ISOMETRIC_RATIO, OBJECTS_HITBOX, PLAYER_HITBOX, SHOW_HITBOX } from "../constants";
 import { InteractiveObject } from "./InteractiveObject";
 
 export class Player {
@@ -117,7 +117,7 @@ export class Player {
     invaderW: number,
     invaderH: number
   ) {
-    const { x, y, width, height } = this.getPositionAndSize(0.25);
+    const { x, y, width, height } = this.getPositionAndSize(PLAYER_HITBOX);
     if (
       invaderX < x + width &&
       invaderX + invaderW > x &&
@@ -132,12 +132,18 @@ export class Player {
   private checkForCollisions(objects: InteractiveObject[]) {
     objects.forEach((object) => {
       let highlight = false;
-      const { x, y, width, height } = object.getPositionAndSize(0.5);
+      const { x, y, width, height } = object.getPositionAndSize(OBJECTS_HITBOX);
       if (this.hasCollided(x, y, width, height)) {
         highlight = true;
       } 
       object.setHighlight(highlight);
     });
+  }
+
+  private hitbox(canvas: CanvasRenderingContext2D){
+    const { x, y, width, height } = this.getPositionAndSize(PLAYER_HITBOX);
+    canvas.fillStyle = "lime";
+    canvas.fillRect(x, y, width, height);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -158,5 +164,7 @@ export class Player {
       x: this.position.x + this.size / 2,
       y: this.position.y - 5,
     });
+
+    SHOW_HITBOX && this.hitbox(canvas);
   }
 }

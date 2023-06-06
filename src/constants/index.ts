@@ -23,4 +23,9 @@ export const DRAWER_SIZE = 200;
 export const DESK_SIZE = 220;
 export const PLAYER_SPEED = 0.4;
 export const ANIMATION_PERIOD = 100;
+
+export const PLAYER_HITBOX = 0.25;
+export const OBJECTS_HITBOX = 0.5;
+export const SHOW_HITBOX = false;
+
 export const ISOMETRIC_RATIO = Math.cos(Math.PI / 4) * Math.cos(Math.PI / 6); //o ângulo de visualização do mapa é de 30° de inclinação, por isso esta constante
