@@ -1,6 +1,6 @@
 import { position, quad } from "../types";
 
-export class Sprite {
+export default class Sprite {
   source: HTMLImageElement;
   rows: number;
   columns: number;

@@ -1,5 +1,5 @@
-import { Player } from "./Player";
-import { Sprite } from "./Sprite";
+import Player from "./Player";
+import Sprite from "./Sprite";
 
 type position = {
   x: number;

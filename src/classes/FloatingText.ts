@@ -1,5 +1,5 @@
 import { position } from "../types";
-import { Sprite } from "./Sprite";
+import Sprite from "./Sprite";
 
 export default class FloatingText {     //classe para representar os textos flutuantes (nomes de personagens, ações em objetos, etc)
   text: string;                         //as variáveis aqui são bem diretas (acho eu) em relação ao que armazenam.

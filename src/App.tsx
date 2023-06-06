@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Body, EscapeRoom, ScoreBoard } from "./App.style";
-import { InteractiveObject } from "./classes/InteractiveObject";
 import { useGlobalContext } from "./contexts";
-import { Player } from "./classes/Player";
-import { Sprite } from "./classes/Sprite";
+import InteractiveObject from "./classes/InteractiveObject";
+import Player from "./classes/Player";
+import Floor from "./classes/Floor";
 import Button from "./components/Button";
 import useLoop from "./hooks/useLoop";
 import playerSprite from "./assets/player.png"; //importação normal do arquivo de imagem
@@ -14,6 +14,8 @@ import doorSound from "./assets/sounds/door.mp3";
 import grabSound from "./assets/sounds/grab.mp3";
 import paperSound from "./assets/sounds/paper.mp3";
 import wooshSound from "./assets/sounds/woosh1.mp3";
+import RenderAll from "./functions/Renderer";
+import UpdateAll from "./functions/Updater";
 import { CANVAS_WIDTH, CANVAS_HEIGHT, DRAWER_SIZE, DESK_SIZE, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD, FLOOR_TOP_Y, FLOOR_PADDING } from "./constants";
 
 const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
@@ -41,7 +43,7 @@ export default function App() {
   const key = useRef<string | undefined>(keyPressed);
   const players = useRef<Player[]>([]);
   const objects = useRef<InteractiveObject[]>([]);
-  const floor = useRef<Sprite>();
+  const floor = useRef<Floor>();
 
   useEffect(() => {
     objects.current = [
@@ -85,7 +87,7 @@ export default function App() {
       ),
     ];
 
-    floor.current = new Sprite(floorSprite, CANVAS_WIDTH - (FLOOR_PADDING / 2), 1, 1, 0);
+    floor.current = new Floor(floorSprite, { x: FLOOR_PADDING, y: FLOOR_TOP_Y}, CANVAS_WIDTH - 2 * FLOOR_PADDING);
   }, []);
 
   useEffect(() => {
@@ -103,19 +105,8 @@ export default function App() {
     if (floor.current && ctx.current) {
       const context = ctx.current;
       context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); //limpeza do canvas
-      floor.current.render(context, { x: FLOOR_PADDING, y: FLOOR_TOP_Y});
-
-      objects.current.forEach((o) => {
-        //update e render do vetor de alvos
-        o.update(key.current);
-        o.render(context);
-      });
-
-      players.current.forEach((p) => {
-        //update e render do vetor de players
-        p.update(dt, objects.current, key.current);
-        p.render(context);
-      });
+      UpdateAll({dt, key, floor, objects, players});
+      RenderAll({context, floor, objects, players});
     }
   });
 

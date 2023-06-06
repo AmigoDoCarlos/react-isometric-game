@@ -1,10 +1,10 @@
 import { position } from "../types";
+import InteractiveObject from "./InteractiveObject";
 import FloatingText from "./FloatingText";
-import { Sprite } from "./Sprite";
+import Sprite from "./Sprite";
 import { ISOMETRIC_RATIO, OBJECTS_HITBOX, PLAYER_HITBOX, SHOW_HITBOX } from "../constants";
-import { InteractiveObject } from "./InteractiveObject";
 
-export class Player {
+export default class Player {
   name: FloatingText;
   sprite: Sprite;
   speed: number;
@@ -18,7 +18,7 @@ export class Player {
   constructor(
     name: string,
     spriteSrc: string,
-    initialPos: position,
+    position: position,
     speed: number,
     size: number,
     animationPeriod: number
@@ -27,7 +27,7 @@ export class Player {
     this.isWalking = false;
     this.speed = speed;
     this.size = size;
-    this.position = initialPos;
+    this.position = position;
     this.dp = { x: 0, y: 0 };
     this.direction = "left";
     this.sprite = new Sprite(spriteSrc, size, 4, 2, animationPeriod);
