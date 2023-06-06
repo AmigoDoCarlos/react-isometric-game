@@ -7,16 +7,10 @@ import Floor from "./classes/Floor";
 import Button from "./components/Button";
 import useLoop from "./hooks/useLoop";
 import playerSprite from "./assets/player.png"; //importação normal do arquivo de imagem
-import drawerSprite from "./assets/drawer.png";
-import deskSprite from "./assets/desk.png";
-import floorSprite from "./assets/floor.png";
-import doorSound from "./assets/sounds/door.mp3";
-import grabSound from "./assets/sounds/grab.mp3";
-import paperSound from "./assets/sounds/paper.mp3";
-import wooshSound from "./assets/sounds/woosh1.mp3";
 import RenderAll from "./functions/Renderer";
 import UpdateAll from "./functions/Updater";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, DRAWER_SIZE, DESK_SIZE, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD, FLOOR_TOP_Y, FLOOR_PADDING } from "./constants";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD } from "./constants";
+import BuildScene from "./functions/SceneBuilder";
 
 const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
   players.current = [
@@ -46,48 +40,7 @@ export default function App() {
   const floor = useRef<Floor>();
 
   useEffect(() => {
-    objects.current = [
-      new InteractiveObject(
-        drawerSprite,
-        DRAWER_SIZE,
-        3,
-        {
-          x: 80,
-          y: (CANVAS_HEIGHT - DRAWER_SIZE) / 3.4,
-        },
-        [
-          {
-            sound: doorSound,
-            texts: ["abrir o armário", "fechar o armário"],
-          },
-          {
-            sound: grabSound,
-            texts: ["pegar o conteúdo"],
-          },
-        ]
-      ),
-      new InteractiveObject(
-        deskSprite,
-        DESK_SIZE,
-        3,
-        {
-          x: CANVAS_WIDTH - (DRAWER_SIZE + 80),
-          y: (CANVAS_HEIGHT - DRAWER_SIZE) / 3.4,
-        },
-        [
-          {
-            sound: wooshSound,
-            texts: ["abrir o notebook", "fechar o notebook"],
-          },
-          {
-            sound: paperSound,
-            texts: ["pegar o papel"],
-          },
-        ]
-      ),
-    ];
-
-    floor.current = new Floor(floorSprite, { x: FLOOR_PADDING, y: FLOOR_TOP_Y}, CANVAS_WIDTH - 2 * FLOOR_PADDING);
+    BuildScene({objects, floor});
   }, []);
 
   useEffect(() => {
