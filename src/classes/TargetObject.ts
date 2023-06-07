@@ -6,7 +6,7 @@ type position = {
   y: number;
 };
 
-export class Target {
+export class TargetObject {
   size: number;
   position: position;
   sprite: Sprite;

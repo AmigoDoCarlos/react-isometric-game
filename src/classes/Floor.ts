@@ -1,4 +1,5 @@
 import { ISOMETRIC_ANGLE } from "../constants";
+import { getDistance } from "../functions/Metrics";
 import { position } from "../types";
 import { Sprite } from "./Sprite";
 
@@ -45,9 +46,7 @@ export class Floor {
 
     getDistanceToBottomCorner(origin: position){
         const destiny = this.getBottomCornerCoordinates();
-        const delta = {x: destiny.x - origin.x, y: destiny.y - origin.y};
-
-        return Math.hypot(delta.x, delta.y);
+        return getDistance(origin, destiny);
     }
 
     ////////////////////////////////////////////////////////////////////
