@@ -34,7 +34,7 @@ export default function RenderAll({context, players, objects, floor} : RendererP
     const renderables: ObjectAndDistance[] = [];
 
     players.current && players.current.forEach(p => {
-        const { x, y, width, height } = p.getPositionAndSize(PLAYER_HITBOX);
+        const { x, y, width, height } = p.getAllDimensions();
         const origin = {x: x + width / 2, y: y + height};
         renderables.push({
             object: p,
@@ -47,7 +47,7 @@ export default function RenderAll({context, players, objects, floor} : RendererP
     });
 
     objects.current.forEach(o => {
-        const { x, y, width, height } = o.getPositionAndSize(OBJECTS_HITBOX);
+        const { x, y, width, height } = o.getAllDimensions();
         const origin = {x: x + width / 2, y: y + height};
         renderables.push({
             object: o,

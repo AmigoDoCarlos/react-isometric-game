@@ -1,6 +1,6 @@
-import InteractiveObject from "../classes/InteractiveObject";
-import Player from "../classes/Player";
-import Floor from "../classes/Floor";
+import { InteractiveObject } from "../classes/InteractiveObject";
+import { Player } from "../classes/Player";
+import { Floor}  from "../classes/Floor";
 
 interface UpdaterProps {
     dt: number,

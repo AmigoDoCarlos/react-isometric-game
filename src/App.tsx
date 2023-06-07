@@ -10,7 +10,7 @@ import playerSprite from "./assets/player.png"; //importação normal do arquivo
 import RenderAll from "./functions/Renderer";
 import UpdateAll from "./functions/Updater";
 import BuildScene from "./functions/SceneBuilder";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD } from "./constants";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SIZE, PLAYER_SPEED, ANIMATION_PERIOD, PLAYER_HITBOX } from "./constants";
 
 
 const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
@@ -25,7 +25,30 @@ const spawnPlayer = (players: React.MutableRefObject<Player[]>) => {
       },
       PLAYER_SPEED,
       PLAYER_SIZE,
-      ANIMATION_PERIOD
+      ANIMATION_PERIOD,
+      [
+        {
+          offset: {
+            x: (1 - PLAYER_HITBOX) * PLAYER_SIZE / 2,
+            y: 40,
+          },
+          size: PLAYER_SIZE * PLAYER_HITBOX,
+        },
+        {
+          offset: {
+            x: (1 - PLAYER_HITBOX) * PLAYER_SIZE / 2,
+            y: 60,
+          },
+          size: PLAYER_SIZE * PLAYER_HITBOX,
+        },
+        {
+          offset: {
+            x: (1 - PLAYER_HITBOX) * PLAYER_SIZE / 2,
+            y: 80,
+          },
+          size: PLAYER_SIZE * PLAYER_HITBOX,
+        },
+      ]
     ),
   ];
 };

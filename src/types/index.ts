@@ -22,3 +22,8 @@ export type textAndSound = {
   sound: string;
   texts: string[];
 };
+
+export type hitbox = {
+  offset: position,
+  size: number,
+}

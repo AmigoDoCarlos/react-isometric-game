@@ -1,8 +1,9 @@
-import { position } from "../types";
+import { hitbox, position } from "../types";
 import { InteractiveObject } from "./InteractiveObject";
 import { FloatingText } from "./FloatingText";
 import { Sprite } from "./Sprite";
-import { ISOMETRIC_RATIO, OBJECTS_HITBOX, PLAYER_HITBOX, SHOW_HITBOX } from "../constants";
+import { ACTION_KEYS, ISOMETRIC_RATIO, SHOW_HITBOX } from "../constants";
+import { DraggableObject } from "./DraggableObject";
 
 export class Player {
   name: FloatingText;
@@ -14,6 +15,9 @@ export class Player {
   direction: string;
   allowedDirections = ["right", "down", "up", "left"];
   isWalking: boolean;
+  hitboxes: hitbox[]; 
+  items: DraggableObject[];
+  lastKeyPressed: string | undefined;  
 
   constructor(
     name: string,
@@ -21,7 +25,8 @@ export class Player {
     position: position,
     speed: number,
     size: number,
-    animationPeriod: number
+    animationPeriod: number,
+    hitboxes: hitbox[],
   ) {
     this.name = new FloatingText(name, null);
     this.isWalking = false;
@@ -31,6 +36,8 @@ export class Player {
     this.dp = { x: 0, y: 0 };
     this.direction = "left";
     this.sprite = new Sprite(spriteSrc, size, 4, 2, animationPeriod);
+    this.hitboxes = hitboxes;
+    this.items = [];
   }
 
   private updateDirection(dt: number, direction: string) {
@@ -94,68 +101,115 @@ export class Player {
     this.position = pos;
   }
 
-  getPositionAndSize(hitbox?: number) {
+  getAllDimensions() {
     const h = this.sprite.source.height;
     const w = this.sprite.source.width;
     const ratio = h / this.sprite.rows / (w / this.sprite.columns);
 
-    const margin = hitbox && (hitbox > 0 && hitbox <= 1)
-    ? ((1 - hitbox) * this.size) / 2
-    : 0;
-
     return {
-      x: this.position.x + margin,
-      y: this.position.y + margin,
-      width: (this.size - 2 * margin),
-      height: (this.size * ratio - 2 * margin),
+      x: this.position.x,
+      y: this.position.y,                                                                                                                   
+      width: (this.size),
+      height: (this.size * ratio),
+      hitboxes: this.hitboxes,
     };
   }
 
   private hasCollided(
     invaderX: number,
     invaderY: number,
-    invaderW: number,
-    invaderH: number
+    invaderHitboxes: hitbox[],
   ) {
-    const { x, y, width, height } = this.getPositionAndSize(PLAYER_HITBOX);
-    if (
-      invaderX < x + width &&
-      invaderX + invaderW > x &&
-      invaderY < y + height &&
-      invaderY + invaderH > y
-    ) {
-      return true;
-    }
-    return false;
+    let hit = false;
+    const { x, y, hitboxes } = this.getAllDimensions();
+    hitboxes && hitboxes.forEach(myHitbox => { 
+      invaderHitboxes.forEach(hitbox => {
+        if (
+          invaderX + hitbox.offset.x < x + myHitbox.offset.x + myHitbox.size &&
+          invaderX + hitbox.offset.x + hitbox.size > x + myHitbox.offset.x &&
+          invaderY + hitbox.offset.y < y + myHitbox.offset.y + myHitbox.size &&
+          invaderY + hitbox.offset.y + hitbox.size > y + myHitbox.offset.y
+        ) {
+          hit = true;
+          return true;
+        }
+      });
+    });
+    return hit;
   }
 
   private checkForCollisions(objects: InteractiveObject[]) {
     objects.forEach((object) => {
       let highlight = false;
-      const { x, y, width, height } = object.getPositionAndSize(OBJECTS_HITBOX);
-      if (this.hasCollided(x, y, width, height)) {
+      const { x, y, hitboxes } = object.getAllDimensions();
+      if (this.hasCollided(x, y, hitboxes)) {
+        object.orderSlotsAccordingToDistance(this);
         highlight = true;
       } 
       object.setHighlight(highlight);
     });
   }
 
-  private hitbox(canvas: CanvasRenderingContext2D){
-    const { x, y, width, height } = this.getPositionAndSize(PLAYER_HITBOX);
+  private renderHitboxes(canvas: CanvasRenderingContext2D){
     canvas.fillStyle = "lime";
-    canvas.fillRect(x, y, width, height);
+    this.hitboxes.forEach(hit => {
+      canvas.fillRect(
+        this.position.x + hit.offset.x,
+        this.position.y + hit.offset.y,
+        hit.size,
+        hit.size,
+      );
+    });
+  }
+
+  getNearestItem(){
+    if(!this.items || this.items.length === 0) return null;
+    return this.items[0];
+  }
+
+  takeItem(){
+    if(!this.items || this.items.length === 0) return;
+    this.items.splice(0, 1);
+  }
+
+  putItem(item: DraggableObject){
+    this.items.unshift(item);
+  }
+
+  handleItems(objects: InteractiveObject[], key: string){
+    if(key !== ACTION_KEYS[1].key || this.lastKeyPressed) return;
+
+    const index = objects.findIndex(o => o.isHighlighted);
+    if (index < 0) return;
+
+    const nearestObject = objects[index];
+    if(!nearestObject.isOpen && !nearestObject.slotsAlwaysVisible) return;
+    const item = nearestObject.getNearestItem();
+    if(item){
+      nearestObject.takeItem();
+      this.putItem(item);
+      return item.playSound();
+    }
+    const myItem = this.getNearestItem();
+    console.log(myItem);
+    if(!myItem) return;
+    this.takeItem();
+    nearestObject.putItem(myItem);
+    myItem.playSound();
   }
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  update(dt: number, objects: InteractiveObject[], walkDirection: string | undefined) {
+  update(dt: number, objects: InteractiveObject[], keyPressed: string | undefined) {
     this.checkForCollisions(objects);
-    if (walkDirection) {
-      this.updateDirection(dt, walkDirection);
+    if (keyPressed) {
+      this.handleItems(objects, keyPressed);
+      this.updateDirection(dt, keyPressed);
       this.updatePosition();
     } else {
       this.reset();
     }
+    this.lastKeyPressed = keyPressed;
   }
 
   render(canvas: CanvasRenderingContext2D) {
@@ -165,6 +219,6 @@ export class Player {
       y: this.position.y - 5,
     });
 
-    SHOW_HITBOX && this.hitbox(canvas);
+    SHOW_HITBOX && this.renderHitboxes(canvas);
   }
 }

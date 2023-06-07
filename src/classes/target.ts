@@ -1,5 +1,5 @@
-import Player from "./Player";
-import Sprite from "./Sprite";
+import { Player } from "./Player";
+import { Sprite } from "./Sprite";
 
 type position = {
   x: number;
@@ -35,7 +35,7 @@ export class Target {
     this.position = pos;
   }
 
-  getPositionAndSize(hitbox?: number) {
+  getAllDimensions(hitbox?: number) {
     const h = this.sprite.source.height;
     const w = this.sprite.source.width;
     const ratio = h / this.sprite.rows / (w / this.sprite.columns);
@@ -57,7 +57,7 @@ export class Target {
     invaderW: number,
     invaderH: number
   ) {
-    const { x, y, width, height } = this.getPositionAndSize(0.5);
+    const { x, y, width, height } = this.getAllDimensions(0.5);
 
     if (
       invaderX < x + width &&
@@ -77,7 +77,7 @@ export class Target {
     scorePoints: () => void
   ) {
     players.forEach((player) => {
-      const { x, y, width, height } = player.getPositionAndSize(0.5);
+      const { x, y, width, height } = player.getAllDimensions();
       if (this.hasCollided(x, y, width, height)) {
         scorePoints();
         this.setPosition({
